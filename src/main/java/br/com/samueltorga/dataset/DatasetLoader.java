@@ -115,10 +115,27 @@ public class DatasetLoader {
         return is;
     }
 
-    public boolean isReady() { return ready; }
-    public int vectorCount() { return vectorCount; }
-    public float[] vectors() { return vectors; }
-    public boolean[] isfraud() { return isfraud; }
-    public Map<String, Float> mccRisk() { return mccRisk; }
-    public NormalizationConstants normalization() { return normalization; }
+    public boolean isReady() {
+        return ready;
+    }
+
+    public int vectorCount() {
+        return vectorCount;
+    }
+
+    public float[] vectors() {
+        return vectors;
+    }
+
+    public boolean[] isfraud() {
+        return isfraud;
+    }
+
+    public Map<String, Float> mccRisk() {
+        return mccRisk;
+    }
+
+    public NormalizationConstants normalization() {
+        return normalization;
+    }
 }

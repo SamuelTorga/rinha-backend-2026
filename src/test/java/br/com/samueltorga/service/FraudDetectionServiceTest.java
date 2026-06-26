@@ -165,8 +165,14 @@ class FraudDetectionServiceTest {
         // Os 5 mais próximos são todos fraude → fraudCount = 5
         float[] vectors = new float[10 * 14];
         boolean[] isfraud = new boolean[10];
-        for (int i = 0; i < 5; i++)  { fill(vectors, i, 0.01f); isfraud[i] = true; }
-        for (int i = 5; i < 10; i++) { fill(vectors, i, 0.90f); isfraud[i] = false; }
+        for (int i = 0; i < 5; i++) {
+            fill(vectors, i, 0.01f);
+            isfraud[i] = true;
+        }
+        for (int i = 5; i < 10; i++) {
+            fill(vectors, i, 0.90f);
+            isfraud[i] = false;
+        }
 
         int count = FraudDetectionService.knn(new float[14], vectors, isfraud, 10);
 
@@ -179,9 +185,18 @@ class FraudDetectionServiceTest {
         // 5 mais próximos: 2 fraud + 3 legit → fraudCount = 2
         float[] vectors = new float[10 * 14];
         boolean[] isfraud = new boolean[10];
-        for (int i = 0; i < 2; i++)  { fill(vectors, i, 0.01f); isfraud[i] = true; }
-        for (int i = 2; i < 5; i++)  { fill(vectors, i, 0.10f); isfraud[i] = false; }
-        for (int i = 5; i < 10; i++) { fill(vectors, i, 0.90f); isfraud[i] = true; }
+        for (int i = 0; i < 2; i++) {
+            fill(vectors, i, 0.01f);
+            isfraud[i] = true;
+        }
+        for (int i = 2; i < 5; i++) {
+            fill(vectors, i, 0.10f);
+            isfraud[i] = false;
+        }
+        for (int i = 5; i < 10; i++) {
+            fill(vectors, i, 0.90f);
+            isfraud[i] = true;
+        }
 
         int count = FraudDetectionService.knn(new float[14], vectors, isfraud, 10);
 
@@ -190,6 +205,8 @@ class FraudDetectionServiceTest {
 
     private static void fill(float[] vectors, int index, float value) {
         int base = index * 14;
-        for (int d = 0; d < 14; d++) vectors[base + d] = value;
+        for (int d = 0; d < 14; d++) {
+            vectors[base + d] = value;
+        }
     }
 }

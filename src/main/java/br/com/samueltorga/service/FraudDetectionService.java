@@ -120,7 +120,11 @@ public class FraudDetectionService {
         }
 
         int fraudCount = 0;
-        for (boolean f : topFraud) if (f) fraudCount++;
+        for (boolean f : topFraud) {
+            if (f) {
+                fraudCount++;
+            }
+        }
         return fraudCount;
     }
 
@@ -136,7 +140,9 @@ public class FraudDetectionService {
     private static int worstIndex(float[] dist) {
         int idx = 0;
         for (int i = 1; i < 5; i++) {
-            if (dist[i] > dist[idx]) idx = i;
+            if (dist[i] > dist[idx]) {
+                idx = i;
+            }
         }
         return idx;
     }
