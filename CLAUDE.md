@@ -10,6 +10,7 @@ This project follows TDD. Write the test first, make it compile (with minimal st
 - **Endpoint tests**: `@QuarkusTest` + `@InjectMock` (from `quarkus-junit5-mockito`) to mock `DatasetLoader` so the server starts without loading the 16 MB dataset.
 - Run all tests: `./mvnw test`
 - Run a single test class: `./mvnw test -Dtest=TransactionRequestTest`
+- **After every code change, run `./mvnw checkstyle:check` and fix all violations before considering the task done.** Rules live in `.codequality/checkstyle.xml`.
 
 Concrete input/output pairs from [DETECTION_RULES.md](https://github.com/zanfranceschi/rinha-de-backend-2026/blob/main/docs/en/DETECTION_RULES.md) (the legit and fraud examples) are the canonical test cases for vectorization.
 
