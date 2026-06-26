@@ -3,6 +3,7 @@ package br.com.samueltorga.resource;
 import br.com.samueltorga.dataset.DatasetLoader;
 import br.com.samueltorga.dto.FraudScoreResponse;
 import br.com.samueltorga.dto.TransactionRequest;
+import br.com.samueltorga.service.FraudDetectionService;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -18,6 +19,9 @@ public class FraudScoreResource {
     @Inject
     DatasetLoader datasetLoader;
 
+    @Inject
+    FraudDetectionService detectionService;
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -26,7 +30,7 @@ public class FraudScoreResource {
         if (!datasetLoader.isReady()) {
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         }
-        // TODO: vectorize + KNN
-        return Response.ok(new FraudScoreResponse(true, 0.0f)).build();
+        FraudScoreResponse result = detectionService.evaluate(request);
+        return Response.ok(result).build();
     }
 }

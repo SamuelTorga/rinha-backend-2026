@@ -1,14 +1,18 @@
 package br.com.samueltorga.resource;
 
 import br.com.samueltorga.dataset.DatasetLoader;
+import br.com.samueltorga.dto.FraudScoreResponse;
+import br.com.samueltorga.dto.TransactionRequest;
+import br.com.samueltorga.service.FraudDetectionService;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class FraudScoreResourceTest {
@@ -16,7 +20,10 @@ class FraudScoreResourceTest {
     @InjectMock
     DatasetLoader datasetLoader;
 
-    private static final String LEGIT_PAYLOAD = """
+    @InjectMock
+    FraudDetectionService detectionService;
+
+    private static final String VALID_PAYLOAD = """
             {
               "id": "tx-1329056812",
               "transaction": { "amount": 41.12, "installments": 2, "requested_at": "2026-03-11T18:45:53Z" },
@@ -28,27 +35,44 @@ class FraudScoreResourceTest {
             """;
 
     @Test
-    void returns503WhenDatasetIsNotReady() {
-        Mockito.when(datasetLoader.isReady()).thenReturn(false);
+    void returns503WhenDatasetNotReady() {
+        when(datasetLoader.isReady()).thenReturn(false);
 
         given()
-                .contentType(ContentType.JSON)
-                .body(LEGIT_PAYLOAD)
+                .contentType(ContentType.JSON).body(VALID_PAYLOAD)
                 .when().post("/fraud-score")
                 .then().statusCode(503);
+
+        verifyNoInteractions(detectionService);
     }
 
     @Test
-    void returns200WithBodyWhenDatasetIsReady() {
-        Mockito.when(datasetLoader.isReady()).thenReturn(true);
+    void returnsApprovedWhenFraudScoreIsLow() {
+        when(datasetLoader.isReady()).thenReturn(true);
+        when(detectionService.evaluate(any(TransactionRequest.class)))
+                .thenReturn(new FraudScoreResponse(true, 0.0f));
 
         given()
-                .contentType(ContentType.JSON)
-                .body(LEGIT_PAYLOAD)
+                .contentType(ContentType.JSON).body(VALID_PAYLOAD)
                 .when().post("/fraud-score")
                 .then()
                 .statusCode(200)
-                .body("approved", notNullValue())
-                .body("fraud_score", notNullValue());
+                .body("approved", equalTo(true))
+                .body("fraud_score", equalTo(0.0f));
+    }
+
+    @Test
+    void returnsRejectedWhenFraudScoreIsHigh() {
+        when(datasetLoader.isReady()).thenReturn(true);
+        when(detectionService.evaluate(any(TransactionRequest.class)))
+                .thenReturn(new FraudScoreResponse(false, 1.0f));
+
+        given()
+                .contentType(ContentType.JSON).body(VALID_PAYLOAD)
+                .when().post("/fraud-score")
+                .then()
+                .statusCode(200)
+                .body("approved", equalTo(false))
+                .body("fraud_score", equalTo(1.0f));
     }
 }
