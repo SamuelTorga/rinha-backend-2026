@@ -15,7 +15,7 @@ Acompanhamento do desenvolvimento da solução de detecção de fraude via KNN v
 | KNN brute-force | ✅ Concluído |
 | Endpoint `/fraud-score` | ✅ Concluído |
 | Testes unitários | ✅ Concluído |
-| ExceptionMapper (payload inválido → 400) | ⬜ Pendente |
+| ExceptionMapper (payload inválido → 400) | ✅ Concluído |
 | Otimização SIMD (Panama Vector API) | ⬜ Pendente |
 | Docker Compose + Nginx | ⬜ Pendente |
 | Dockerfile de produção | ⬜ Pendente |
@@ -52,8 +52,13 @@ Acompanhamento do desenvolvimento da solução de detecção de fraude via KNN v
   - Transação legítima → `{"approved":true,"fraud_score":0.0}` ✅
   - Transação fraude → `{"approved":false,"fraud_score":1.0}` ✅
 
+### ExceptionMapper
+- `GlobalExceptionMapper.JsonMapper` (`@Provider ExceptionMapper<JsonProcessingException>`) → 400 para JSON malformado ou campos obrigatórios ausentes
+- `FallbackMapper` descartado: converter erros internos do servidor em 400 seria semânticamente incorreto e mascararia bugs reais sem melhorar o placar da competição (qualquer não-200 para payload válido já é penalidade)
+- Validado com 1 teste adicional em `FraudScoreResourceTest`
+
 ### Testes
-- 21 testes, todos passando
+- 22 testes, todos passando
 - Puro JUnit 5 + AssertJ para DTOs, vetorização e KNN (sem startup do Quarkus)
 - `@QuarkusTest` + `@InjectMock` para endpoints (DatasetLoader e FraudDetectionService mockados)
 - `verifyNoInteractions(detectionService)` garante que o serviço não é chamado quando não pronto
@@ -61,12 +66,6 @@ Acompanhamento do desenvolvimento da solução de detecção de fraude via KNN v
 ---
 
 ## Pendente
-
-### ExceptionMapper (próximo)
-- Payload inválido ou campos ausentes atualmente retorna **500**
-- O spec penaliza erro HTTP com -5 por ocorrência — nunca pode retornar 5xx
-- Criar `ExceptionMapper<JsonProcessingException>` → 400
-- Criar `ExceptionMapper<Exception>` genérico → 400/422 como fallback
 
 ### Otimização SIMD — Panama Vector API
 - Substituir o loop escalar em `squaredDistance()` por `FloatVector` (AVX2: 8 floats/instrução)

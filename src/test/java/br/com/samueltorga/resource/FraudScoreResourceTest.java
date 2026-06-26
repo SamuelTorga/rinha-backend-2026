@@ -77,4 +77,15 @@ class FraudScoreResourceTest {
                 .body("approved", equalTo(false))
                 .body("fraud_score", equalTo(1.0f));
     }
+
+    @Test
+    void returns400ForMalformedJson() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{ not valid json }")
+                .when().post("/fraud-score")
+                .then()
+                .statusCode(400);
+    }
+
 }
