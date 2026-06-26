@@ -20,7 +20,7 @@ public record TransactionRequest(
 
     public record Customer(
             double avgAmount,
-            int txCount24h,
+            @JsonProperty("tx_count_24h") int txCount24h,
             List<String> knownMerchants
     ) {}
 

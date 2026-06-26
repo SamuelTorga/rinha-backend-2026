@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## TDD
+
+This project follows TDD. Write the test first, make it compile (with minimal stub), run it (expect it to fail), then implement until it passes.
+
+- **Pure unit tests** (DTOs, vectorization, KNN math): plain JUnit 5 + Jackson, no `@QuarkusTest`. Fast, no Quarkus startup.
+- **Endpoint tests**: `@QuarkusTest` + `@InjectMock` (from `quarkus-junit5-mockito`) to mock `DatasetLoader` so the server starts without loading the 16 MB dataset.
+- Run all tests: `./mvnw test`
+- Run a single test class: `./mvnw test -Dtest=TransactionRequestTest`
+
+Concrete input/output pairs from [DETECTION_RULES.md](https://github.com/zanfranceschi/rinha-de-backend-2026/blob/main/docs/en/DETECTION_RULES.md) (the legit and fraud examples) are the canonical test cases for vectorization.
+
 ## Commands
 
 ```bash
@@ -91,7 +102,15 @@ KNN: k=5, Euclidean distance, brute-force. `fraud_score = fraudCount / 5`. `appr
 
 ### Jackson configuration
 
-`quarkus.jackson.property-naming-strategy=SNAKE_CASE` is set globally — all DTO fields are **camelCase in Java** and automatically map to/from **snake_case in JSON**. The one exception: `@JsonProperty("is_online")` is explicitly annotated on `Terminal.isOnline` because Jackson strips the `is` prefix on boolean accessor methods, which would produce `"online"` instead of `"is_online"`.
+`quarkus.jackson.property-naming-strategy=SNAKE_CASE` is set globally — all DTO fields are **camelCase in Java** and automatically map to/from **snake_case in JSON**. Three fields require `@JsonProperty` because SNAKE_CASE alone doesn't produce the right key:
+
+| Java field | Auto SNAKE_CASE | Actual JSON key | Fix |
+|---|---|---|---|
+| `Terminal.isOnline` | `"online"` (strips `is` prefix) | `"is_online"` | `@JsonProperty("is_online")` |
+| `Customer.txCount24h` | `"tx_count24h"` (no `_` before digit) | `"tx_count_24h"` | `@JsonProperty("tx_count_24h")` |
+| `NormalizationConstants.maxTxCount24h` | `"max_tx_count24h"` | `"max_tx_count_24h"` | `@JsonProperty("max_tx_count_24h")` |
+
+**General rule**: any field whose name contains a number immediately after a letter requires an explicit `@JsonProperty`.
 
 ## Infrastructure constraints
 
