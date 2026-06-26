@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class TransactionRequestTest {
 
@@ -33,22 +33,22 @@ class TransactionRequestTest {
 
         TransactionRequest req = mapper.readValue(json, TransactionRequest.class);
 
-        assertEquals("tx-3576980410", req.id());
-        assertEquals(384.88, req.transaction().amount());
-        assertEquals(3, req.transaction().installments());
-        assertEquals("2026-03-11T20:23:35Z", req.transaction().requestedAt());
-        assertEquals(769.76, req.customer().avgAmount());
-        assertEquals(3, req.customer().txCount24h());
-        assertEquals(List.of("MERC-009", "MERC-001"), req.customer().knownMerchants());
-        assertEquals("MERC-001", req.merchant().id());
-        assertEquals("5912", req.merchant().mcc());
-        assertEquals(298.95, req.merchant().avgAmount());
-        assertFalse(req.terminal().isOnline());
-        assertTrue(req.terminal().cardPresent());
-        assertEquals(13.709, req.terminal().kmFromHome());
-        assertNotNull(req.lastTransaction());
-        assertEquals("2026-03-11T14:58:35Z", req.lastTransaction().timestamp());
-        assertEquals(18.862, req.lastTransaction().kmFromCurrent());
+        assertThat(req.id()).isEqualTo("tx-3576980410");
+        assertThat(req.transaction().amount()).isEqualTo(384.88);
+        assertThat(req.transaction().installments()).isEqualTo(3);
+        assertThat(req.transaction().requestedAt()).isEqualTo("2026-03-11T20:23:35Z");
+        assertThat(req.customer().avgAmount()).isEqualTo(769.76);
+        assertThat(req.customer().txCount24h()).isEqualTo(3);
+        assertThat(req.customer().knownMerchants()).containsExactly("MERC-009", "MERC-001");
+        assertThat(req.merchant().id()).isEqualTo("MERC-001");
+        assertThat(req.merchant().mcc()).isEqualTo("5912");
+        assertThat(req.merchant().avgAmount()).isEqualTo(298.95);
+        assertThat(req.terminal().isOnline()).isFalse();
+        assertThat(req.terminal().cardPresent()).isTrue();
+        assertThat(req.terminal().kmFromHome()).isEqualTo(13.709);
+        assertThat(req.lastTransaction()).isNotNull();
+        assertThat(req.lastTransaction().timestamp()).isEqualTo("2026-03-11T14:58:35Z");
+        assertThat(req.lastTransaction().kmFromCurrent()).isEqualTo(18.862);
     }
 
     @Test
@@ -66,7 +66,7 @@ class TransactionRequestTest {
 
         TransactionRequest req = mapper.readValue(json, TransactionRequest.class);
 
-        assertNull(req.lastTransaction());
+        assertThat(req.lastTransaction()).isNull();
     }
 
     @Test
@@ -84,7 +84,7 @@ class TransactionRequestTest {
 
         TransactionRequest req = mapper.readValue(json, TransactionRequest.class);
 
-        assertTrue(req.terminal().isOnline());
-        assertFalse(req.terminal().cardPresent());
+        assertThat(req.terminal().isOnline()).isTrue();
+        assertThat(req.terminal().cardPresent()).isFalse();
     }
 }

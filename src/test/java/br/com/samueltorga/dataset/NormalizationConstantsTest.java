@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NormalizationConstantsTest {
 
@@ -22,16 +21,16 @@ class NormalizationConstantsTest {
     @Test
     void matchesActualNormalizationJson() throws Exception {
         try (InputStream is = getClass().getResourceAsStream("/data/normalization.json")) {
-            assertNotNull(is, "normalization.json not found on classpath");
+            assertThat(is).as("normalization.json not found on classpath").isNotNull();
             NormalizationConstants nc = mapper.readValue(is, NormalizationConstants.class);
 
-            assertEquals(10_000f, nc.maxAmount());
-            assertEquals(12f, nc.maxInstallments());
-            assertEquals(10f, nc.amountVsAvgRatio());
-            assertEquals(1_440f, nc.maxMinutes());
-            assertEquals(1_000f, nc.maxKm());
-            assertEquals(20f, nc.maxTxCount24h());
-            assertEquals(10_000f, nc.maxMerchantAvgAmount());
+            assertThat(nc.maxAmount()).isEqualTo(10_000f);
+            assertThat(nc.maxInstallments()).isEqualTo(12f);
+            assertThat(nc.amountVsAvgRatio()).isEqualTo(10f);
+            assertThat(nc.maxMinutes()).isEqualTo(1_440f);
+            assertThat(nc.maxKm()).isEqualTo(1_000f);
+            assertThat(nc.maxTxCount24h()).isEqualTo(20f);
+            assertThat(nc.maxMerchantAvgAmount()).isEqualTo(10_000f);
         }
     }
 }

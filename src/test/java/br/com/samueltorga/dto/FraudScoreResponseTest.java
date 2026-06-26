@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class FraudScoreResponseTest {
 
@@ -21,23 +21,23 @@ class FraudScoreResponseTest {
     void serializesApprovedWithZeroScore() throws Exception {
         JsonNode node = mapper.valueToTree(new FraudScoreResponse(true, 0.0f));
 
-        assertTrue(node.get("approved").asBoolean());
-        assertEquals(0.0f, node.get("fraud_score").floatValue());
-        assertFalse(node.has("fraudScore"), "camelCase key must not appear in JSON");
+        assertThat(node.get("approved").asBoolean()).isTrue();
+        assertThat(node.get("fraud_score").floatValue()).isEqualTo(0.0f);
+        assertThat(node.has("fraudScore")).as("camelCase key must not appear in JSON").isFalse();
     }
 
     @Test
     void serializesRejectedWithFullScore() throws Exception {
         JsonNode node = mapper.valueToTree(new FraudScoreResponse(false, 1.0f));
 
-        assertFalse(node.get("approved").asBoolean());
-        assertEquals(1.0f, node.get("fraud_score").floatValue());
+        assertThat(node.get("approved").asBoolean()).isFalse();
+        assertThat(node.get("fraud_score").floatValue()).isEqualTo(1.0f);
     }
 
     @Test
     void serializesPartialScore() throws Exception {
         JsonNode node = mapper.valueToTree(new FraudScoreResponse(true, 0.4f));
 
-        assertEquals(0.4f, node.get("fraud_score").floatValue(), 0.001f);
+        assertThat(node.get("fraud_score").floatValue()).isCloseTo(0.4f, org.assertj.core.data.Offset.offset(0.001f));
     }
 }
