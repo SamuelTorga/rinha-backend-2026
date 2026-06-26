@@ -11,12 +11,23 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
+/**
+ * Fraud detection pipeline: vectorize → KNN → score.
+ *
+ * <p>{@link #vectorize} and {@link #knn} are package-private statics so they can be
+ * unit-tested without CDI. {@link #evaluate} is the only entry point for production code.
+ */
 @ApplicationScoped
 public class FraudDetectionService {
 
     @Inject
     DatasetLoader dataset;
 
+    /**
+     * Evaluates whether a transaction is fraudulent.
+     *
+     * <p>Threshold: {@code fraud_score >= 0.6} → rejected. Fixed by the competition spec.
+     */
     public FraudScoreResponse evaluate(TransactionRequest tx) {
         float[] vector = vectorize(tx, dataset.normalization(), dataset.mccRisk());
         int fraudCount = knn(vector, dataset.vectors(), dataset.isfraud(), dataset.vectorCount());
@@ -24,6 +35,21 @@ public class FraudDetectionService {
         return new FraudScoreResponse(score < 0.6f, score);
     }
 
+    /**
+     * Transforms a transaction payload into a 14-dimensional float vector.
+     *
+     * <p>All dimensions are clamped to {@code [0.0, 1.0]} except indices 5 and 6, which carry
+     * {@code -1f} when {@code last_transaction} is {@code null}. That sentinel is the only
+     * value outside {@code [0, 1]} and must not be replaced or filtered — the reference
+     * dataset uses the same convention, so KNN naturally groups "no-history" transactions.
+     *
+     * <p>Full spec: <a href="https://github.com/zanfranceschi/rinha-de-backend-2026/blob/main/docs/en/DETECTION_RULES.md">DETECTION_RULES.md</a>
+     *
+     * @param tx      incoming transaction payload
+     * @param nc      normalization constants loaded from {@code normalization.json}
+     * @param mccRisk MCC → risk score map; unknown MCCs default to {@code 0.5f}
+     * @return 14-element vector ready for KNN search
+     */
     static float[] vectorize(TransactionRequest tx, NormalizationConstants nc, Map<String, Float> mccRisk) {
         TransactionRequest.Transaction trx = tx.transaction();
         TransactionRequest.Customer cust = tx.customer();
@@ -38,6 +64,7 @@ public class FraudDetectionService {
 
         OffsetDateTime requestedAt = OffsetDateTime.parse(trx.requestedAt());
         v[3] = requestedAt.getHour() / 23.0f;
+        // DayOfWeek.getValue() returns 1 (Mon) – 7 (Sun); spec wants 0 (Mon) – 6 (Sun)
         v[4] = (requestedAt.getDayOfWeek().getValue() - 1) / 6.0f;
 
         if (tx.lastTransaction() != null) {
@@ -54,6 +81,7 @@ public class FraudDetectionService {
         v[8]  = clamp(cust.txCount24h() / nc.maxTxCount24h());
         v[9]  = term.isOnline() ? 1f : 0f;
         v[10] = term.cardPresent() ? 1f : 0f;
+        // dim[11] is 1 when the merchant is UNKNOWN (inverted — higher = more suspicious)
         v[11] = cust.knownMerchants().contains(merch.id()) ? 0f : 1f;
         v[12] = mccRisk.getOrDefault(merch.mcc(), 0.5f);
         v[13] = clamp((float) merch.avgAmount() / nc.maxMerchantAvgAmount());
@@ -61,6 +89,23 @@ public class FraudDetectionService {
         return v;
     }
 
+    /**
+     * Brute-force k=5 nearest-neighbour search over the reference dataset.
+     *
+     * <p>Uses <em>squared</em> Euclidean distance: the square root is never computed because
+     * it is a monotone transformation that does not change the neighbour ordering, saving
+     * ~1 M {@code Math.sqrt} calls per request.
+     *
+     * <p>The top-5 slot with the worst (largest) distance is replaced whenever a closer
+     * candidate is found. With k=5 fixed, a linear scan of 5 slots per iteration is faster
+     * than a heap due to lower constant factors and better cache behaviour.
+     *
+     * @param query   vectorized transaction (14 floats)
+     * @param vectors flat reference array; vector {@code i} starts at {@code i * 14}
+     * @param isfraud label array parallel to {@code vectors}
+     * @param count   number of valid entries in {@code vectors} / {@code isfraud}
+     * @return number of fraud labels among the 5 nearest neighbours (0–5)
+     */
     static int knn(float[] query, float[] vectors, boolean[] isfraud, int count) {
         float[] topDist = {Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE};
         boolean[] topFraud = new boolean[5];
@@ -97,6 +142,6 @@ public class FraudDetectionService {
     }
 
     private static float clamp(float x) {
-        return Math.max(0f, Math.min(1f, x));
+        return Math.clamp(x, 0f, 1f);
     }
 }
