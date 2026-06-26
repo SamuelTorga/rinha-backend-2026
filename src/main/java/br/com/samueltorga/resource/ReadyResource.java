@@ -13,6 +13,11 @@ public class ReadyResource {
     @Inject
     DatasetLoader datasetLoader;
 
+    /**
+     * Health-check endpoint for the dataset readiness probe.
+     *
+     * <p>Returns {@code 200 OK} when the dataset is loaded, {@code 503 Service Unavailable} otherwise.
+     */
     @GET
     @RunOnVirtualThread
     public Response ready() {

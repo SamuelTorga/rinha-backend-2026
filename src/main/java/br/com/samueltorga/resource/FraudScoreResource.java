@@ -22,6 +22,11 @@ public class FraudScoreResource {
     @Inject
     FraudDetectionService detectionService;
 
+    /**
+     * Evaluates a transaction and returns its fraud score.
+     *
+     * <p>Returns {@code 503 Service Unavailable} while the reference dataset is still loading.
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

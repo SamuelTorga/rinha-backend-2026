@@ -115,26 +115,40 @@ public class DatasetLoader {
         return is;
     }
 
+    /** Returns {@code true} when the dataset has finished loading and is safe to query. */
     public boolean isReady() {
         return ready;
     }
 
+    /** Returns the number of reference vectors loaded from {@code references.json.gz}. */
     public int vectorCount() {
         return vectorCount;
     }
 
+    /**
+     * Returns the flat float array of reference vectors.
+     *
+     * <p>Vector {@code i} occupies indices {@code [i*14, i*14+13]}.
+     */
     public float[] vectors() {
         return vectors;
     }
 
+    /**
+     * Returns the fraud-label array parallel to {@link #vectors()}.
+     *
+     * <p>{@code isfraud[i] == true} means the vector at index {@code i} is a known fraud case.
+     */
     public boolean[] isfraud() {
         return isfraud;
     }
 
+    /** Returns the MCC → risk score map; unknown MCCs should default to {@code 0.5f}. */
     public Map<String, Float> mccRisk() {
         return mccRisk;
     }
 
+    /** Returns the normalization constants used to scale raw feature values to {@code [0, 1]}. */
     public NormalizationConstants normalization() {
         return normalization;
     }

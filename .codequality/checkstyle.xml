@@ -19,7 +19,16 @@
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     </module>
 
+    <module name="SuppressionFilter">
+        <property name="file" value=".codequality/checkstyle-suppressions.xml"/>
+    </module>
+
     <module name="TreeWalker">
+
+        <!-- ===== Javadoc ===== -->
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="public"/>
+        </module>
 
         <!-- ===== Naming conventions ===== -->
         <module name="PackageName">
