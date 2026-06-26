@@ -1,11 +1,12 @@
 package br.com.samueltorga.service;
 
-import br.com.samueltorga.dataset.NormalizationConstants;
-import br.com.samueltorga.dto.TransactionRequest;
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
+import br.com.samueltorga.dataset.NormalizationConstants;
+import br.com.samueltorga.dto.TransactionRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;

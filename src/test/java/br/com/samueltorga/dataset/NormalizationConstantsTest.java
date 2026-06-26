@@ -1,11 +1,11 @@
 package br.com.samueltorga.dataset;
 
+import java.io.InputStream;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

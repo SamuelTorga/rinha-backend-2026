@@ -1,10 +1,11 @@
 package br.com.samueltorga.resource;
 
-import br.com.samueltorga.dataset.DatasetLoader;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import br.com.samueltorga.dataset.DatasetLoader;
 
 import static io.restassured.RestAssured.given;
 

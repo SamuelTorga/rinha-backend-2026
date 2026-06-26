@@ -1,15 +1,16 @@
 package br.com.samueltorga.service;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.util.Map;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import br.com.samueltorga.dataset.DatasetLoader;
 import br.com.samueltorga.dataset.NormalizationConstants;
 import br.com.samueltorga.dto.FraudScoreResponse;
 import br.com.samueltorga.dto.TransactionRequest;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.util.Map;
 
 /**
  * Fraud detection pipeline: vectorize → KNN → score.

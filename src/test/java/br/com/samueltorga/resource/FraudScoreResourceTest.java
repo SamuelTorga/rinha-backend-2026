@@ -1,13 +1,14 @@
 package br.com.samueltorga.resource;
 
-import br.com.samueltorga.dataset.DatasetLoader;
-import br.com.samueltorga.dto.FraudScoreResponse;
-import br.com.samueltorga.dto.TransactionRequest;
-import br.com.samueltorga.service.FraudDetectionService;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
+
+import br.com.samueltorga.dataset.DatasetLoader;
+import br.com.samueltorga.dto.FraudScoreResponse;
+import br.com.samueltorga.dto.TransactionRequest;
+import br.com.samueltorga.service.FraudDetectionService;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
